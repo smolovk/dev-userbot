@@ -22,7 +22,7 @@ async def command_reply_test(_client, message):
 
 commands = {
     "chatid": command_chatid,
-    "eval": command_eval,
+    # "eval": command_eval,
     "reply_test": command_reply_test
 }
 
