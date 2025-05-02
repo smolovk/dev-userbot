@@ -1,5 +1,6 @@
 from pyrogram import Client
 from dotenv import load_dotenv
+import psutil
 import os
 
 load_dotenv()
@@ -20,10 +21,19 @@ async def command_reply_test(_client, message):
     print(message)
     await message.edit("asdf")
 
+async def command_stats(_client, message):
+    res = []
+    res.append(f"CPU usage: {psutil.cpu_percent(interval=1)}%")
+
+    mem = psutil.virtual_memory()
+    res.append(f"Memory usage: {mem.percent}%")
+    await message.edit("\n".join(res))
+
 commands = {
     "chatid": command_chatid,
     # "eval": command_eval,
-    "reply_test": command_reply_test
+    "reply_test": command_reply_test,
+    "stats": command_stats
 }
 
 @app.on_message()
