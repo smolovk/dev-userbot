@@ -2,13 +2,57 @@ from pyrogram import Client
 from dotenv import load_dotenv
 import psutil
 import os
+from openai import OpenAI
 
 load_dotenv()
+ai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 api_id = os.getenv("API_ID")
 api_hash = os.getenv("API_HASH")
 
 app = Client("my_account", api_id=api_id, api_hash=api_hash)
+
+
+async def command_ai(_client, message):
+    if not message.reply_to_message:
+        await message.edit("You should reply to something, dumbass!")
+        return
+    response = ai_client.responses.create(
+      model="gpt-4o-mini",
+      input=[
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "input_text",
+              "text": "You are Marv, a chatbot that reluctantly answers questions with angry and very sarcastic responses. Treat every question as a stupid one. Your purpose is to help your owner answer other people's questions. The inputs that are given to you are their messages. Answer in the same language as question. Give very short, concise, factual answers. Dont use too much punctuation\n"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "input_text",
+              "text": message.reply_to_message.text
+            }
+          ]
+        },
+      ],
+      text={
+        "format": {
+          "type": "text"
+        }
+      },
+      reasoning={},
+      tools=[],
+      temperature=1,
+      max_output_tokens=1024,
+      top_p=1,
+      store=False
+    )
+    await message.edit(response.output_text)
+
 
 async def command_chatid(_client, message):
     await message.edit(message.chat.id)
@@ -33,7 +77,8 @@ commands = {
     "chatid": command_chatid,
     # "eval": command_eval,
     "reply_test": command_reply_test,
-    "stats": command_stats
+    "stats": command_stats,
+    "ai": command_ai
 }
 
 @app.on_message()
